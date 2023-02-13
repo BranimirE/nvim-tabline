@@ -3,6 +3,7 @@
 
 local M = {}
 local fn = vim.fn
+local api = vim.api
 
 M.options = {
     show_index = true,
@@ -11,7 +12,19 @@ M.options = {
     brackets = { '[', ']' },
     no_name = 'No Name',
     modify_indicator = '[+]',
+    nvimtree_side = 'none'
 }
+
+local function NvimTreeSpace()
+    local nvimTreeWidth = 0
+    for _, win in pairs(api.nvim_tabpage_list_wins(0)) do
+        if vim.bo[api.nvim_win_get_buf(win)].ft == 'NvimTree' then
+            nvimTreeWidth = api.nvim_win_get_width(win) + 1
+            return '%#NvimTreeNormal#' .. string.rep(' ', nvimTreeWidth)
+        end
+    end
+    return ''
+end
 
 local function tabline(options)
     local s = ''
@@ -59,6 +72,11 @@ local function tabline(options)
     end
 
     s = s .. '%#TabLineFill#'
+
+    if options.nvimtree_side == 'left' or options.nvimtree_side == 'right' then
+        s = (options.nvimtree_side == 'left') and NvimTreeSpace() .. s or s.. NvimTreeSpace()
+    end
+
     return s
 end
 
